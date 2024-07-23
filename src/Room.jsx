@@ -8,7 +8,45 @@ import config from "./config";
 function Room() {
   const [name, setName] = useState("");
   const [price, setPrice] = useState(0);
-  const [rooms, setRooms] = useState([]);
+  const [rooms, setRooms] = useState([]); // ใช้เพื่อเอาไป loop เลยต้องสร้างแบบ Array
+  const [room, setRoom] = useState({}); // defind object
+  const [fileRoom, setFileRoom] = useState(null);
+
+  const chooseFile = (files) => {
+    if (files !== undefined) {
+      if (files !== null) {
+        if (files.length > 0) {
+          const file = files[0];
+          setFileRoom(file);
+        }
+      }
+    }
+  };
+
+  const uploadFile = async () => {
+    try {
+      if (fileRoom !== null) {
+        let formData = new FormData();
+        formData.append("fileRoom", fileRoom);
+        const headers = {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        };
+        await axios.post(
+          config.apiPath + "/api/roomImage/create/" + room.id,
+          formData,
+          headers
+        );
+      }
+    } catch (e) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  };
 
   const handleSave = async () => {
     try {
@@ -95,6 +133,10 @@ function Room() {
     }
   };
 
+  const chooseRoom = (item) => {
+    setRoom(item);
+  };
+
   return (
     <Template>
       <div className="h3">ห้องพัก</div>
@@ -113,7 +155,7 @@ function Room() {
             <th>id</th>
             <th>ชื่อห้องพัก</th>
             <th>ราคาห้อง</th>
-            <th width="110px"></th>
+            <th width="160px"></th>
           </tr>
         </thead>
         <tbody>
@@ -124,6 +166,14 @@ function Room() {
                 <td>{item.name}</td>
                 <td>{item.price}</td>
                 <td className="text-center">
+                  <button
+                    className="btn btn-success me-1"
+                    data-bs-toggle="modal"
+                    data-bs-target="#modalRoomImage"
+                    onClick={() => chooseRoom(item)}
+                  >
+                    <i className="fa fa-image"></i>
+                  </button>
                   <button className="btn btn-primary me-1">
                     <i className="fa fa-pencil"></i>
                   </button>
@@ -141,6 +191,31 @@ function Room() {
           )}
         </tbody>
       </table>
+
+      <MyModal id="modalRoomImage" title="เลือกภาพของห้องพัก">
+        <div className="row">
+          <div className="col-2">ห้อง</div>
+          <div className="col-10">
+            <input className="form-control" disabled value={room.name} />
+          </div>
+        </div>
+        <div className="row mt-3">
+          <div className="col-2">เลือกภาพ</div>
+          <div className="col-10">
+            <input
+              className="form-control"
+              type="file"
+              onChange={(e) => chooseFile(e.target.files)}
+            />
+          </div>
+        </div>
+
+        <div className="text-center">
+          <button className="mt-3 btn btn-primary" onClick={() => uploadFile()}>
+            <i className="fa fa-plus me-2"></i>เพิ่มภาพของห้องนี้
+          </button>
+        </div>
+      </MyModal>
 
       <MyModal id="modalRoom" title="จัดการห้องพัก">
         <div>ชื่อห้องพัก</div>
