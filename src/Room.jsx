@@ -11,6 +11,7 @@ function Room() {
   const [rooms, setRooms] = useState([]); // ใช้เพื่อเอาไป loop เลยต้องสร้างแบบ Array
   const [room, setRoom] = useState({}); // defind object
   const [fileRoom, setFileRoom] = useState(null);
+  const [roomImages, setRoomImages] = useState([]);
 
   const chooseFile = (files) => {
     if (files !== undefined) {
@@ -38,6 +39,28 @@ function Room() {
           formData,
           headers
         );
+
+        fetchDataRoomImages(room.id);
+
+        document.getElementById("modalRoomImage_btnClose").click();
+      }
+    } catch (e) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
+  };
+
+  const fetchDataRoomImages = async (roomId) => {
+    try {
+      const res = await axios.get(
+        config.apiPath + "/api/roomImage/list/" + roomId
+      );
+
+      if (res.data.results !== undefined) {
+        setRoomImages(res.data.results);
       }
     } catch (e) {
       Swal.fire({
@@ -135,6 +158,30 @@ function Room() {
 
   const chooseRoom = (item) => {
     setRoom(item);
+    fetchDataRoomImages(item.id);
+  };
+
+  const removeRoomImage = async (item) => {
+    try {
+      const button = await Swal.fire({
+        title: "ลบภาพ",
+        text: "ยืนยันการลบภาพของห้องนี้",
+        icon: "question",
+        showCancelButton: true,
+        showConfirmButton: true,
+      });
+
+      if (button.isConfirmed) {
+        await axios.delete(config.apiPath + "/api/roomImage/remove/" + item.id);
+        fetchDataRoomImages(item.roomId);
+      }
+    } catch (e) {
+      Swal.fire({
+        title: "error",
+        text: e.message,
+        icon: "error",
+      });
+    }
   };
 
   return (
@@ -214,6 +261,33 @@ function Room() {
           <button className="mt-3 btn btn-primary" onClick={() => uploadFile()}>
             <i className="fa fa-plus me-2"></i>เพิ่มภาพของห้องนี้
           </button>
+        </div>
+
+        <div className="row mt-3">
+          {roomImages.length > 0 ? (
+            roomImages.map((item) => (
+              <div className="col-4">
+                <div className="card">
+                  <div className="card-image">
+                    <img
+                      src={config.apiPath + "/uploads/" + item.name}
+                      width="100%"
+                    />
+                  </div>
+                  <div className="card-body text-center">
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => removeRoomImage(item)}
+                    >
+                      <i className="fa fa-times me-2"></i>ลบภาพ
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <></>
+          )}
         </div>
       </MyModal>
 
