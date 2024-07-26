@@ -65,10 +65,10 @@ function Sidebar() {
               </Link>
             </li>
             <li class="nav-item">
-              <a href="https://adminlte.io/docs/3.1/" class="nav-link">
+              <Link to="/roomRent" class="nav-link">
                 <i class="nav-icon fas fa-file"></i>
                 <p>รายงานการจองห้อง</p>
-              </a>
+              </Link>
             </li>
           </ul>
         </nav>
